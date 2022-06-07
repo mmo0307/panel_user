@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import classNames from 'classnames';
 
-//import { fetchFilters } from '../../actions';
 import { filtersChanged, fetchFilters, selectAll } from  './filtersSlice';
 import Spinner from '../spinner/Spinner';
 import store from '../../store/index';

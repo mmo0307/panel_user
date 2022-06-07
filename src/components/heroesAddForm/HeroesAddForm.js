@@ -1,11 +1,11 @@
-import {useHttp} from '../../hooks/http.hook';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { heroCreated } from '../heroesList/heroesSlice';
 import {selectAll} from '../heroesFilters/filtersSlice';
 import store from '../../store';
+
+import { useCreateHeroMutation } from '../../api/apiSlice';
 
 const HeroesAddForm = () => {
     // Состояния для контроля формы
@@ -13,11 +13,10 @@ const HeroesAddForm = () => {
     const [heroDescr, setHeroDescr] = useState('');
     const [heroElement, setHeroElement] = useState('');
 
+    const [createHero, {isLoading}] = useCreateHeroMutation();
+
     const {filtersLoadingStatus} = useSelector(state => state.filters);
-    const dispatch = useDispatch();
-    const {request} = useHttp();
-    const filters = selectAll(store.getState())
-    console.log(filters)
+    const filters = selectAll(store.getState());
 
     const onSubmitHandler = (e) => {
         e.preventDefault();
@@ -29,12 +28,7 @@ const HeroesAddForm = () => {
             element: heroElement
         }
 
-        // Отправляются данные на сервер в формате JSON
-        // ТОЛЬКО если запрос успешен - отправляю персонажа в store
-        request("http://localhost:3001/heroes", "POST", JSON.stringify(newHero))
-            .then(res => console.log(res, 'Отправка успешна'))
-            .then(dispatch(heroCreated(newHero)))
-            .catch(err => console.log(err));
+        createHero(newHero).unwrap();
 
         // Очищаю форму после отправки
         setHeroName('');
@@ -45,7 +39,7 @@ const HeroesAddForm = () => {
     const renderFilters = (filters, status) => {
         console.log(filters)
         
-        if (status === "loading") {
+        if (isLoading) {
             return <option>Загрузка элементов</option>
         } else if (status === "error") {
             return <option>Ошибка загрузки</option>
